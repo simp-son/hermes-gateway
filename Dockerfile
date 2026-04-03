@@ -10,22 +10,19 @@ RUN apt-get update && apt-get install -y \
     build-essential libssl-dev libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Hermes
-RUN curl -sSL https://hermes.sh/install | bash
+# Install Hermes via pip
+RUN pip3 install hermes-agent
 
-ENV PATH="/root/.hermes/bin:/root/.local/bin:$PATH"
+ENV PATH="/root/.local/bin:$PATH"
 
 # Create config dirs
-RUN mkdir -p /root/.hermes
+RUN mkdir -p /root/.hermes/skills
 
 # Copy config and skills
 COPY config.yaml /root/.hermes/config.yaml
 COPY skills/ /root/.hermes/skills/
 
-# These come from Render environment variables at runtime
-# ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS, TELEGRAM_HOME_CHANNEL
-
-# Write .env from environment variables at startup
+# Entrypoint writes .env from env vars and starts gateway
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
