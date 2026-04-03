@@ -38,6 +38,11 @@ tts:
 cron:
   wrap_response: true
 
+skills:
+  external_dirs:
+    - /root/.hermes/skills/trailofbits/plugins
+    - /root/.hermes/skills/pashov
+
 platform_toolsets:
   telegram:
   - browser
