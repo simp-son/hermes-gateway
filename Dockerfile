@@ -10,10 +10,11 @@ RUN apt-get update && apt-get install -y \
     build-essential libssl-dev libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Hermes
-RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+# Install Hermes — skip interactive setup wizard
+RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+    | bash -s -- --skip-setup
 
-ENV PATH="/root/.local/bin:/root/.hermes/bin:$PATH"
+ENV PATH="/root/.local/bin:/root/.hermes/hermes-agent/venv/bin:$PATH"
 
 # Create config dirs
 RUN mkdir -p /root/.hermes/skills
