@@ -16,14 +16,12 @@ RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/
 
 ENV PATH="/root/.local/bin:/root/.hermes/hermes-agent/venv/bin:$PATH"
 
-# Create config dirs
-RUN mkdir -p /root/.hermes/skills
+# Store config and skills in /app (not ~/.hermes — that will be a persistent disk mount)
+RUN mkdir -p /app/skills
+COPY config.yaml /app/config.yaml
+COPY skills/ /app/skills/
 
-# Copy config and skills
-COPY config.yaml /root/.hermes/config.yaml
-COPY skills/ /root/.hermes/skills/
-
-# Entrypoint writes .env from env vars and starts gateway
+# Entrypoint seeds ~/.hermes on first boot from /app, then starts gateway
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
