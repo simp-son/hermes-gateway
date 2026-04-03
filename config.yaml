@@ -22,7 +22,6 @@ memory:
 
 display:
   compact: false
-  personality: kawaii
   streaming: true
   tool_progress: all
   background_process_notifications: all
@@ -39,9 +38,7 @@ cron:
   wrap_response: true
 
 skills:
-  external_dirs:
-    - /root/.hermes/skills/trailofbits/plugins
-    - /root/.hermes/skills/pashov
+  external_dirs: []
 
 platform_toolsets:
   telegram:
