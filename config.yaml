@@ -1,0 +1,62 @@
+model:
+  default: claude-sonnet-4-6
+  provider: anthropic
+
+agent:
+  max_turns: 60
+  tool_use_enforcement: auto
+  verbose: false
+  reasoning_effort: medium
+
+terminal:
+  backend: local
+  timeout: 180
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200
+  user_char_limit: 1375
+  nudge_interval: 10
+  flush_min_turns: 6
+
+display:
+  compact: false
+  personality: kawaii
+  streaming: true
+  tool_progress: all
+  background_process_notifications: all
+
+stt:
+  enabled: false
+
+tts:
+  provider: edge
+  edge:
+    voice: en-US-AriaNeural
+
+cron:
+  wrap_response: true
+
+platform_toolsets:
+  telegram:
+  - browser
+  - clarify
+  - code_execution
+  - cronjob
+  - delegation
+  - file
+  - image_gen
+  - memory
+  - session_search
+  - skills
+  - terminal
+  - todo
+  - tts
+  - vision
+  - web
+
+web:
+  backend: exa
+
+_config_version: 10

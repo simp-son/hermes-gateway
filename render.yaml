@@ -1,0 +1,16 @@
+services:
+  - type: worker
+    name: hermes-gateway
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_ALLOWED_USERS
+        sync: false
+      - key: TELEGRAM_HOME_CHANNEL
+        sync: false
+    autoDeploy: true
