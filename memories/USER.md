@@ -1,7 +1,0 @@
-Bhargav is building a 24/7 autonomous audit system: 2 cron jobs (immunefi-contest-hunter every 12h, exploit-kb-updater every 24h) hunt contests, audit repos, save missed patterns to memory, and update evm-exploit-kb. Render ($7/mo) hosts the Telegram gateway (repo: simp-son/hermes-gateway). Skills installed: trailofbits full suite, pashov solidity-auditor (now 9 agents), slither, evm-exploit-kb.
-§
-Bhargav works on smart contract security and DeFi. He is building a perps exchange called Nunchi (contracts at /Users/bhargavkacharla/nunchi/contracts-core-new/contracts-core, branch off_market). He wants continuous 24/7 automated security auditing of his contracts delivered to Telegram.
-§
-Bhargav is a smart contract security researcher. Works on Nunchi (perps exchange, /Users/bhargavkacharla/nunchi/contracts-core-new/contracts-core, branch: off_market). Telegram: @marcus_hermes1_bot. GitHub: simp-son. Anthropic auth uses ANTHROPIC_TOKEN (OAuth/Claude Max, sk-ant-oat01-...) not ANTHROPIC_API_KEY. Render persistent disk needed at /root/.hermes to survive redeploys.
-§
-Bhargav prefers simple, practical solutions over complex ones. When presented with fine-tuning vs memory-based learning, he correctly identified that persistent memory + Claude is cheaper and more effective than GPU fine-tuning. He thinks from first principles and questions assumptions well.

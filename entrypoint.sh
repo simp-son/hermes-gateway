@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Ensure hermes is on PATH
+export PATH="/root/.hermes/hermes-agent/venv/bin:/root/.local/bin:$PATH"
+
 mkdir -p /root/.hermes
 
 # Always write credentials
@@ -14,32 +17,28 @@ LLM_MODEL=claude-sonnet-4-6
 EOF
 echo "✓ Credentials written"
 
-# Seed config on first boot
+# Seed on first boot
 if [ ! -f /root/.hermes/config.yaml ]; then
+    echo "✓ First boot — seeding..."
     cp /app/config.yaml /root/.hermes/config.yaml
-    echo "✓ Config seeded"
-fi
 
-# Seed memory on first boot
-if [ ! -f /root/.hermes/memories/MEMORY.md ]; then
+    mkdir -p /root/.hermes/skills
+    cp -r /app/skills/. /root/.hermes/skills/
+
+    # Seed memory
     mkdir -p /root/.hermes/memories
     cp /app/memories/MEMORY.md /root/.hermes/memories/MEMORY.md
     cp /app/memories/USER.md /root/.hermes/memories/USER.md
-    echo "✓ Memory seeded"
-fi
 
-# Seed skills on first boot
-if [ ! -d /root/.hermes/skills/trailofbits ]; then
-    mkdir -p /root/.hermes/skills
-    cp -r /app/skills/. /root/.hermes/skills/
+    # Pull latest skills
     git clone --depth 1 https://github.com/trailofbits/skills /root/.hermes/skills/trailofbits 2>/dev/null || true
     git clone --depth 1 https://github.com/pashov/skills /root/.hermes/skills/pashov 2>/dev/null || true
-    echo "✓ Skills seeded"
+
+    echo "✓ First boot complete"
+else
+    echo "✓ Persistent data found — skipping seed"
 fi
 
-# Start health server in background (required for Render Web Service + persistent disk)
-python3 /app/health.py &
-echo "✓ Health server started on :8080"
-
+echo "✓ Skills: $(ls /root/.hermes/skills/ | wc -l) directories"
 echo "✓ Starting Hermes Telegram gateway..."
-hermes gateway run
+exec hermes gateway run

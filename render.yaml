@@ -1,13 +1,10 @@
 services:
-  - type: web
+  - type: worker
     name: hermes-gateway
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: starter
-    healthCheckPath: /
     envVars:
-      - key: ANTHROPIC_TOKEN
-        sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: TELEGRAM_BOT_TOKEN
@@ -16,7 +13,4 @@ services:
         sync: false
       - key: TELEGRAM_HOME_CHANNEL
         sync: false
-    disk:
-      name: hermes-data
-      mountPath: /root/.hermes
-      sizeGB: 1
+    autoDeploy: true
