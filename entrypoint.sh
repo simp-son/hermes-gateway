@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Ensure hermes is on PATH
-export PATH="/root/.hermes/hermes-agent/venv/bin:/root/.local/bin:$PATH"
+# Hermes installed at /opt/hermes, NOT /root/.hermes (that's the volume)
+export PATH="/opt/hermes/hermes-agent/venv/bin:/root/.local/bin:$PATH"
 
 mkdir -p /root/.hermes
 
@@ -25,15 +25,12 @@ if [ ! -f /root/.hermes/config.yaml ]; then
     mkdir -p /root/.hermes/skills
     cp -r /app/skills/. /root/.hermes/skills/
 
-    # Seed memory
     mkdir -p /root/.hermes/memories
     cp /app/memories/MEMORY.md /root/.hermes/memories/MEMORY.md
     cp /app/memories/USER.md /root/.hermes/memories/USER.md
 
-    # Pull latest skills
     git clone --depth 1 https://github.com/trailofbits/skills /root/.hermes/skills/trailofbits 2>/dev/null || true
     git clone --depth 1 https://github.com/pashov/skills /root/.hermes/skills/pashov 2>/dev/null || true
-
     echo "✓ First boot complete"
 else
     echo "✓ Persistent data found — skipping seed"

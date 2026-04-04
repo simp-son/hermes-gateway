@@ -9,14 +9,13 @@ RUN apt-get update && apt-get install -y \
     build-essential libssl-dev libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Hermes
+# Install Hermes to /opt/hermes instead of ~/.hermes
+# so the volume mount at /root/.hermes doesn't wipe it
+ENV HERMES_INSTALL_DIR=/opt/hermes/hermes-agent
 RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
     | bash -s -- --skip-setup
 
-# Find and print where hermes ended up
-RUN find / -name "hermes" -type f 2>/dev/null | head -5 && echo "---" && which hermes || true
-
-ENV PATH="/root/.hermes/hermes-agent/venv/bin:/root/.local/bin:$PATH"
+ENV PATH="/opt/hermes/hermes-agent/venv/bin:/root/.local/bin:$PATH"
 
 RUN mkdir -p /app/skills /app/memories
 COPY config.yaml /app/config.yaml
