@@ -5,6 +5,9 @@ export PATH="/opt/hermes/hermes-agent/venv/bin:/root/.local/bin:$PATH"
 
 mkdir -p /root/.hermes
 
+# Default memory repo per service (override via MEMORY_REPO_URL env var)
+MEMORY_REPO_URL="${MEMORY_REPO_URL:-simp-son/hermes-memory}"
+
 # Always write credentials
 cat > /root/.hermes/.env << EOF
 OPENCODE_GO_API_KEY=${OPENCODE_GO_API_KEY}
@@ -17,7 +20,7 @@ EOF
 echo "✓ Credentials written"
 
 # Pull latest memory from GitHub
-echo "✓ Pulling memory from GitHub..."
+echo "✓ Pulling memory from ${MEMORY_REPO_URL}..."
 mkdir -p /root/.hermes/memories
 if [ -n "${MEMORY_REPO_PAT}" ]; then
     git config --global user.email "hermes@deploy.sh"
@@ -26,7 +29,7 @@ if [ -n "${MEMORY_REPO_PAT}" ]; then
     if [ -d /root/.hermes/memory-repo/.git ]; then
         git -C /root/.hermes/memory-repo pull origin master --ff-only 2>/dev/null || true
     else
-        git clone --depth 1 https://simp-son:${MEMORY_REPO_PAT}@github.com/simp-son/hermes-memory.git \
+        git clone --depth 1 https://simp-son:${MEMORY_REPO_PAT}@github.com/${MEMORY_REPO_URL}.git \
             /root/.hermes/memory-repo 2>/dev/null || true
     fi
 
