@@ -1,5 +1,5 @@
 model:
-  default: kimi-latest
+  default: kimi-k2.5
   provider: opencode-go
 
 agent:
