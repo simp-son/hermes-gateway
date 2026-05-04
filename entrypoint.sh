@@ -12,7 +12,6 @@ TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
 TELEGRAM_HOME_CHANNEL=${TELEGRAM_HOME_CHANNEL}
 MEMORY_REPO_PAT=${MEMORY_REPO_PAT}
-LLM_MODEL=kimi-k2.6
 HERMES_AGENT_TIMEOUT=600
 EOF
 echo "✓ Credentials written"
@@ -38,9 +37,17 @@ if [ -n "${MEMORY_REPO_PAT}" ]; then
     echo "✓ Memory loaded"
 fi
 
-# Always overwrite config from image (ensures model/provider updates take effect)
+# Always overwrite config from image (ensures provider updates take effect)
 echo "✓ Updating config..."
 cp /app/config.yaml /root/.hermes/config.yaml
+
+# Override model from env var if set (allows different models per Railway service)
+if [ -n "${LLM_MODEL}" ]; then
+    sed -i "s/default:.*/default: ${LLM_MODEL}/" /root/.hermes/config.yaml
+    echo "✓ Model set to: ${LLM_MODEL}"
+else
+    echo "✓ Model: default (kimi-k2.6 from config.yaml)"
+fi
 
 # Seed skills on first boot only
 if [ ! -d /root/.hermes/skills/pashov ]; then
