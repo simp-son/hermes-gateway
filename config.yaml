@@ -1,6 +1,6 @@
 model:
-  default: claude-sonnet-4-6
-  provider: anthropic
+  default: kimi-latest
+  provider: opencode-go
 
 agent:
   max_turns: 60
