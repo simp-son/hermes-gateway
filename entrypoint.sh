@@ -38,17 +38,20 @@ if [ -n "${MEMORY_REPO_PAT}" ]; then
     echo "✓ Memory loaded"
 fi
 
-# Seed config + skills on first boot
-if [ ! -f /root/.hermes/config.yaml ]; then
-    echo "✓ First boot — seeding config and skills..."
-    cp /app/config.yaml /root/.hermes/config.yaml
+# Always overwrite config from image (ensures model/provider updates take effect)
+echo "✓ Updating config..."
+cp /app/config.yaml /root/.hermes/config.yaml
+
+# Seed skills on first boot only
+if [ ! -d /root/.hermes/skills/pashov ]; then
+    echo "✓ First boot — seeding skills..."
     mkdir -p /root/.hermes/skills
-    cp -r /app/skills/. /root/.hermes/skills/
+    cp -r /app/skills/. /root/.hermes/skills/ 2>/dev/null || true
     git clone --depth 1 https://github.com/trailofbits/skills /root/.hermes/skills/trailofbits 2>/dev/null || true
     git clone --depth 1 https://github.com/pashov/skills /root/.hermes/skills/pashov 2>/dev/null || true
-    echo "✓ First boot complete"
+    echo "✓ Skills seeded"
 else
-    echo "✓ Config found — skipping seed"
+    echo "✓ Skills found — skipping seed"
 fi
 
 # Background job: push memory to GitHub every 30 min
