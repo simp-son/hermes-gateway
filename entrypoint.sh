@@ -44,13 +44,37 @@ fi
 echo "✓ Updating config..."
 cp /app/config.yaml /root/.hermes/config.yaml
 
-# Override model from env var if set (allows different models per Railway service)
-if [ -n "${LLM_MODEL}" ]; then
-    sed -i "s/default:.*/default: ${LLM_MODEL}/" /root/.hermes/config.yaml
-    echo "✓ Model set to: ${LLM_MODEL}"
-else
-    echo "✓ Model: default (kimi-k2.6 from config.yaml)"
-fi
+# Override model/provider/base_url from env vars if set (allows different models per Railway service)
+python3 << 'PYEOF'
+import os, sys
+cfg_path = "/root/.hermes/config.yaml"
+# Ensure PyYAML is available
+try:
+    import yaml
+except ImportError:
+    os.system("pip install pyyaml -q")
+    import yaml
+
+with open(cfg_path, "r") as f:
+    cfg = yaml.safe_load(f)
+
+model = cfg.setdefault("model", {})
+if os.environ.get("LLM_MODEL"):
+    model["default"] = os.environ["LLM_MODEL"]
+    print(f"✓ Model set to: {os.environ['LLM_MODEL']}")
+if os.environ.get("LLM_PROVIDER"):
+    model["provider"] = os.environ["LLM_PROVIDER"]
+    print(f"✓ Provider set to: {os.environ['LLM_PROVIDER']}")
+if os.environ.get("LLM_BASE_URL"):
+    model["base_url"] = os.environ["LLM_BASE_URL"]
+    print(f"✓ Base URL set to: {os.environ['LLM_BASE_URL']}")
+if os.environ.get("LLM_API_MODE"):
+    model["api_mode"] = os.environ["LLM_API_MODE"]
+    print(f"✓ API mode set to: {os.environ['LLM_API_MODE']}")
+
+with open(cfg_path, "w") as f:
+    yaml.dump(cfg, f, default_flow_style=False, sort_keys=False)
+PYEOF
 
 # Seed skills on first boot only
 if [ ! -d /root/.hermes/skills/pashov ]; then
