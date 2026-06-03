@@ -15,9 +15,97 @@ TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
 TELEGRAM_HOME_CHANNEL=${TELEGRAM_HOME_CHANNEL}
 MEMORY_REPO_PAT=${MEMORY_REPO_PAT}
+OPENAI_CODEX_ACCESS_TOKEN=${OPENAI_CODEX_ACCESS_TOKEN}
+OPENAI_CODEX_REFRESH_TOKEN=${OPENAI_CODEX_REFRESH_TOKEN}
+CODEX_ACCESS_TOKEN=${CODEX_ACCESS_TOKEN}
+CODEX_REFRESH_TOKEN=${CODEX_REFRESH_TOKEN}
+HERMES_CODEX_ACCESS_TOKEN=${HERMES_CODEX_ACCESS_TOKEN}
+HERMES_CODEX_REFRESH_TOKEN=${HERMES_CODEX_REFRESH_TOKEN}
 HERMES_AGENT_TIMEOUT=600
 EOF
 echo "✓ Credentials written"
+
+# Seed Hermes' own OpenAI Codex OAuth store from deployment env vars.
+# Hermes reads Codex OAuth credentials from /root/.hermes/auth.json, not
+# directly from process env or ~/.codex/auth.json.
+python3 << 'PYEOF'
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+access = (
+    os.environ.get("OPENAI_CODEX_ACCESS_TOKEN")
+    or os.environ.get("CODEX_ACCESS_TOKEN")
+    or os.environ.get("HERMES_CODEX_ACCESS_TOKEN")
+    or os.environ.get("OPENCODE_OAUTH_ACCESS_TOKEN")
+    or ""
+).strip()
+refresh = (
+    os.environ.get("OPENAI_CODEX_REFRESH_TOKEN")
+    or os.environ.get("CODEX_REFRESH_TOKEN")
+    or os.environ.get("HERMES_CODEX_REFRESH_TOKEN")
+    or os.environ.get("OPENCODE_OAUTH_REFRESH_TOKEN")
+    or ""
+).strip()
+
+if access and refresh:
+    auth_path = Path("/root/.hermes/auth.json")
+    try:
+        auth_store = json.loads(auth_path.read_text()) if auth_path.exists() else {}
+    except Exception:
+        auth_store = {}
+
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    auth_store["version"] = auth_store.get("version", 1)
+    providers = auth_store.setdefault("providers", {})
+    providers["openai-codex"] = {
+        "tokens": {
+            "access_token": access,
+            "refresh_token": refresh,
+        },
+        "last_refresh": now,
+        "auth_mode": "chatgpt",
+        "label": os.environ.get("OPENAI_CODEX_LABEL", "Railway OAuth"),
+    }
+    auth_store["active_provider"] = "openai-codex"
+
+    pool = auth_store.setdefault("credential_pool", {})
+    entries = pool.setdefault("openai-codex", [])
+    seeded = {
+        "id": "railway-openai-codex-oauth",
+        "label": os.environ.get("OPENAI_CODEX_LABEL", "Railway OAuth"),
+        "auth_type": "oauth",
+        "priority": 0,
+        "source": "device_code",
+        "access_token": access,
+        "refresh_token": refresh,
+        "last_refresh": now,
+    }
+    replaced = False
+    for i, entry in enumerate(entries):
+        if isinstance(entry, dict) and entry.get("id") == seeded["id"]:
+            entries[i] = seeded
+            replaced = True
+            break
+    if not replaced:
+        entries.insert(0, seeded)
+
+    suppressed = auth_store.get("suppressed_sources")
+    if isinstance(suppressed, dict):
+        sources = suppressed.get("openai-codex")
+        if isinstance(sources, list) and "device_code" in sources:
+            sources.remove("device_code")
+        if isinstance(sources, list) and not sources:
+            suppressed.pop("openai-codex", None)
+        if not suppressed:
+            auth_store.pop("suppressed_sources", None)
+
+    auth_path.write_text(json.dumps(auth_store, indent=2) + "\n")
+    print("✓ OpenAI Codex OAuth credentials seeded")
+else:
+    print("✓ OpenAI Codex OAuth credentials not configured")
+PYEOF
 
 # Pull latest memory from GitHub
 echo "✓ Pulling memory from ${MEMORY_REPO_URL}..."
